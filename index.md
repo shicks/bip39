@@ -22,6 +22,10 @@ share. Because this process is self-inverting (i.e. if A maps to B,
 then B maps to A), commutative, and associative, the specific lookup
 order is unimportant.
 
+For additional security, consider
+ 1. alternating which shares' random words are typed
+ 2. randomizing the order in which words are entered
+
 NOTE: The author makes no warranty, express or implied, regarding the
 fitness of this tool for any particular purpose, and shall not be
 liable for any loss resulting from its use.  Use at your own risk.
