@@ -1,0 +1,30 @@
+<style>
+bip-input {
+  position: sticky;
+  top: 0;
+  background: white;
+  display: block;
+}
+table {
+  margin-top: 1em;
+  border-collapse: collapse;
+}
+table tr:nth-child(even) {
+  background-color: #ddd;
+}
+tr td:first-child {
+  border-left: none !important;
+}
+tr td:nth-child(odd) {
+  border-left: 2px solid black;
+  font-weight: bold;
+}
+td {
+  padding: .4em;
+}
+</style>
+<script type="module" src="bip-input.js"></script>
+<bip-input id="word" multi size=50></bip-input>
+<table id="table">
+</table>
+<script type="module" src="xor.js"></script>
