@@ -26,6 +26,15 @@ For additional security, consider
  1. alternating which shares' random words are typed
  2. randomizing the order in which words are entered
 
+# BIP39 Encrypt
+
+The [encryption tool](./encrypt) allows entering a BIP39 mnemonic to
+use as a symmetric encryption/decryption key.  Multiple shares may be
+entered instead of a single primary mnemonic (in which case the shares
+will be XORed together, see above).
+
+# Disclaimer
+
 NOTE: The author makes no warranty, express or implied, regarding the
-fitness of this tool for any particular purpose, and shall not be
+fitness of these tool for any particular purpose, and shall not be
 liable for any loss resulting from its use.  Use at your own risk.

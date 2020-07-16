@@ -3,19 +3,20 @@ import {index, words} from './words.js';
 const template = document.createElement('template');
 template.innerHTML = `
 <style>
-input {
+textarea {
   padding: .6em;
   font-size: 120%;
   font-weight: bold;
+  resize: none;
 }
 .back {
-  position: absolute;
   color: #888;
   pointer-events: none;
-  z-index: -1;
+  xz-index: -1;
   border: 1px solid transparent;
 }
 .front {
+  position: absolute;
   background-color: transparent;
   border: 1px solid #555;
 }
@@ -32,8 +33,8 @@ input {
 }
 </style>
 <div>
-  <input class="back">
-  <input class="front">
+  <textarea class="front"></textarea>
+  <textarea class="back"></textarea>
 </div>
 `;
 
@@ -49,18 +50,63 @@ class BipInput extends HTMLElement {
     this.wrapper = this.shadowRoot.querySelector('div');
     this.keydown = this.keydown.bind(this);
     this.keyup = this.keyup.bind(this);
+    this.scroll = this.scroll.bind(this);
     this.blur = this.blur.bind(this);
+    this.tabLen = 0;
   }
 
   keydown(e) {
-    if (this.hasAttribute('multi') && e.key === ' ') {
-      this.front.value = this.back.value;
+    // Tab gets special treatment to cycle forward (or backward with shift).
+    if (this.front.selectionStart !== this.front.value.length) return;
+    if (e.key === 'Tab') {
+      if (!this.front.value) return;
+      e.preventDefault();
     }
   }
 
   keyup(e) {
+    if (this.front.selectionStart !== this.front.value.length) {
+      this.compute();
+      return;
+    }
+    if (e.key === 'Shift') return;
+    if (this.hasAttribute('multi') && e.key === ' ') {
+      this.front.value = this.back.value;
+      if (!this.front.value.endsWith(' ')) this.front.value += ' ';
+    }
+    if (e.key === 'Tab') {
+      if (this.tabLen) {
+        const split = this.back.value.split(' ');
+        while (split.length && !split[split.length - 1]) split.pop();
+        const last = split.pop();
+        if (!last) return;
+        const prefix = last.substring(0, this.tabLen);
+        const lastIndex = index.get(last) || 0;
+        let next = words[lastIndex + (e.shiftKey ? -1 : 1)] || '';
+        if (next.substring(0, this.tabLen) !== prefix) {
+          if (e.shiftKey) {
+            let i = index.get(prefix);
+            while (words[i].substring(0, this.tabLen) === prefix) i++;
+            next = words[i - 1];
+          } else {
+            next = words[index.get(prefix) || 0];
+          }
+        }
+        split.push(next);
+        this.front.value = (this.back.value = split.join(' ')) + ' ';
+      } else {
+        this.tabLen = (this.front.value.split(' ').pop() || '').length;
+        this.front.value = this.back.value + ' ';
+      }
+    } else {
+      this.tabLen = 0;
+    }
     this.compute();
     if (e.key === 'Enter') this.front.blur();
+  }
+
+  scroll() {
+    this.back.scrollTo(this.front.scrollLeft, this.front.scrollTop);
   }
 
   blur() {
@@ -76,6 +122,7 @@ class BipInput extends HTMLElement {
     this.front.addEventListener('keyup', this.keyup);
     this.front.addEventListener('keydown', this.keydown);
     this.front.addEventListener('blur', this.blur);
+    this.front.addEventListener('scroll', this.scroll);
     if (!this.hasAttribute('value')) this.setAttribute('value', -1);
   }
 
@@ -83,6 +130,7 @@ class BipInput extends HTMLElement {
     this.front.removeEventListener('keyup', this.keyup);
     this.front.removeEventListener('keydown', this.keydown);
     this.front.removeEventListener('blur', this.blur);
+    this.front.removeEventListener('scroll', this.scroll);
   }
 
   compute() {
@@ -111,25 +159,32 @@ class BipInput extends HTMLElement {
     const newText = newTexts.join(' ');
     this.back.value = newText + remainder;
     if (newText !== this.front.value) this.front.value = newText;
+    if (this._values.length !== values.length) changed = true;
 
     if (changed) {
       this._values = values;
-      this.dispatchEvent(new Event('change'));
+      // TODO - do it instantly, make the handler delayed?
+      setTimeout(() => {
+        this.dispatchEvent(new CustomEvent('change', {bubbles: true}));
+      }, 15);
     }
+    this.scroll();
   }
 
   static get observedAttributes() {
-    return ['size'];
+    return ['cols', 'rows', 'multi', 'placeholder'];
   }
 
   attributeChangedCallback(name, prev, next) {
     switch (name) {
-    case 'size': return this.front.size = this.back.size = next;
+    case 'cols': return this.front.cols = this.back.cols = next;
+    case 'rows': return this.front.rows = this.back.rows = next;
+    case 'placeholder': return this.front.placeholder = next;
     }
   }
 
   get value() {
-    return this._values[0];
+    return this._values[0] || 0;
   }
 
   set value(value) {
@@ -142,10 +197,15 @@ class BipInput extends HTMLElement {
   }
 
   get values() {
+    //if (!this.front.value) return [];
     return [...this._values];
   }
 
   // TODO - set values?
+
+  get words() {
+    return this.values.map(v => words[v]);
+  }
 
   get word() {
     return back.value;
@@ -158,6 +218,22 @@ class BipInput extends HTMLElement {
   }
 
   // TODO - get/set words?
+
+  set multi(multi) {
+    this.setAttribute('multi', multi);
+  }
+
+  set rows(rows) {
+    this.setAttribute('rows', rows);
+  }
+
+  set cols(cols) {
+    this.setAttribute('cols', cols);
+  }
+
+  set placeholder(text) {
+    this.setAttribute('placeholder', text);
+  }
 }
 
 customElements.define('bip-input', BipInput);

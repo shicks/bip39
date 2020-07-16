@@ -3,7 +3,7 @@ bip-input {
   position: sticky;
   top: 0;
   background: white;
-  display: block;
+  display: inline-block;
   margin-bottom: 1em;
 }
 table {
@@ -22,10 +22,16 @@ tr td:nth-child(odd) {
 td {
   padding: .4em;
 }
+.explain {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 100;
+}
 </style>
 <script type="module" src="bip-input.js"></script>
-<bip-input id="word" multi size=50></bip-input>
-<a href="index">What is this?</a>
+<bip-input id="word" multi cols="50" rows="1"></bip-input>
 <table id="table">
 </table>
+<a class="explain" href="index">What is this?</a>
 <script type="module" src="xor.js"></script>
