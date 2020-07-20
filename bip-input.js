@@ -222,7 +222,7 @@ class BipInput extends HTMLElement {
   }
 
   get word() {
-    return back.value;
+    return this.back.value;
   }
 
   set word(word) {

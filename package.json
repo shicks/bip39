@@ -1,0 +1,23 @@
+{
+  "name": "bip39",
+  "version": "1.0.0",
+  "description": "Utilities for dealing with BIP-39 mnemonics",
+  "main": "bip-encrypt.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shicks/bip39.git"
+  },
+  "author": "Stephen Hicks",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/shicks/bip39/issues"
+  },
+  "homepage": "https://github.com/shicks/bip39#readme",
+  "devDependencies": {
+    "google-closure-compiler": "^20200628.0.0",
+    "gulp": "^4.0.2"
+  }
+}

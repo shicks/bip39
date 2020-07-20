@@ -11,7 +11,7 @@ export const hex = {
     return Uint8Array.from(new Array(str.length >>> 1).fill(0).map((_, i) => {
       const digits = str.substring(i << 1, (i + 1) << 1);
       const byte = Number.parseInt(digits, 16);
-      if (isNaN(bytes)) throw new Error(`Invalid hex digits: ${digits}`);
+      if (isNaN(byte)) throw new Error(`Invalid hex digits: ${digits}`);
       return byte;
     }));
   },
