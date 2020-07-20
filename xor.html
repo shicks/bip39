@@ -1,27 +1,4 @@
 <style>
-bip-input {
-  position: sticky;
-  top: 0;
-  background: white;
-  display: inline-block;
-  margin-bottom: 1em;
-}
-table {
-  border-collapse: collapse;
-}
-table tr:nth-child(even) {
-  background-color: #ddd;
-}
-tr td:first-child {
-  border-left: none !important;
-}
-tr td:nth-child(odd) {
-  border-left: 2px solid black;
-  font-weight: bold;
-}
-td {
-  padding: .4em;
-}
 .explain {
   position: absolute;
   top: 0;
@@ -29,9 +6,6 @@ td {
   z-index: 100;
 }
 </style>
-<script type="module" src="bip-input.js"></script>
-<bip-input id="word" multi cols="50" rows="1"></bip-input>
-<table id="table">
-</table>
+<script type="module" src="bip-xor-table.js"></script>
+<bip-xor-table></bip-xor-table>
 <a class="explain" href="index">What is this?</a>
-<script type="module" src="xor.js"></script>

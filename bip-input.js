@@ -43,6 +43,7 @@ class BipInput extends HTMLElement {
   constructor() {
     super();
     this._values = [-1];
+    this._randomWords = [];
     this.attachShadow({mode: 'open'});
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.front = this.shadowRoot.querySelector('.front');
@@ -55,6 +56,13 @@ class BipInput extends HTMLElement {
     this.tabLen = 0;
   }
 
+  _randomWord() {
+    if (!this._randomWords.length) {
+      this._randomWords = [...crypto.getRandomValues(new Uint16Array(100))];
+    }
+    return this._randomWords.pop();
+  }
+
   keydown(e) {
     // Tab gets special treatment to cycle forward (or backward with shift).
     if (this.front.selectionStart !== this.front.value.length) return;
@@ -65,6 +73,12 @@ class BipInput extends HTMLElement {
   }
 
   keyup(e) {
+    if ((e.altKey || e.metaKey) && /^[1-9]$/.test(e.key)) {
+      // generate N random words.
+      this.front.value = new Array(Number.parseInt(e.key)).fill(0).map(() => {
+        return words[this._randomWord() & 0x7ff];
+      }).join(' ');
+    }
     if (this.front.selectionStart !== this.front.value.length) {
       this.compute();
       return;

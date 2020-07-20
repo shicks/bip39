@@ -10,17 +10,18 @@ bip-input {
   margin-top: 0.5em;
   margin-bottom: 0.5em;
 }
-.hidden {
-  display: none;
+.add-share.visible {
+  display: block;
 }
 .add-share {
+  display: none;
   margin-bottom: 0.5em;
 }
 </style>
 <div class="inputs">
   <bip-input multi rows="2" cols="80" placeholder="Enter mnemonic"></bip-input>
 </div>
-<input type="text" class="add-share hidden" placeholder="Add mnemonic share">
+<input type="text" class="add-share" placeholder="Add mnemonic share">
 `;
 
 /** A set of bip-input elements for an XOR-based share. */
@@ -45,7 +46,7 @@ class BipShares extends HTMLElement {
     input.cols = '80';
     this.inputs.appendChild(input);
     input.focus();
-    this.add.classList.add('hidden');
+    this.add.classList.remove('visible');
   }
 
   inputBlur() {
@@ -59,7 +60,7 @@ class BipShares extends HTMLElement {
 
   inputChange() {
     const visible = [...this.inputs.children].every(c => c.values.length);
-    this.add.classList.toggle('hidden', !visible);
+    this.add.classList.toggle('visible', visible);
   }
 
   connectedCallback() {
