@@ -221,6 +221,14 @@ class BipInput extends HTMLElement {
     return this.values.map(v => words[v]);
   }
 
+  set words(array) {
+    for (const word of array) {
+      if (index.get(word) == null) throw new Error(`Invalid word: ${word}`);
+    }
+    this.front.value = array.join(' ');
+    this.compute();
+  }
+
   get word() {
     return this.back.value;
   }
@@ -228,7 +236,8 @@ class BipInput extends HTMLElement {
   set word(word) {
     const i = index.get(word);
     if (i == null) throw new Error(`Invalid word: ${word}`);
-    this.setValue(i);
+    this.front.value = word;
+    this.compute();
   }
 
   // TODO - get/set words?

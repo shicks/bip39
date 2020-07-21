@@ -1,4 +1,5 @@
 import {index, words} from './words.js';
+import {computeChecksum} from './seed.js';
 import './bip-input.js';
 
 const template = document.createElement('template');
@@ -6,6 +7,7 @@ template.innerHTML = `
 <bip-input class="input" multi cols="80" rows="2"
            placeholder="Enter mnemonic to split"></bip-input>
 Shares: <input class="count" type="text" value="3" size="2">
+<input class="fix" type="submit" value="Fix">
 <div class="output"></div>
 `;
 
@@ -18,7 +20,24 @@ class BipSplit extends HTMLElement {
     this.input = this.shadowRoot.querySelector('.input');
     this.count = this.shadowRoot.querySelector('.count');
     this.output = this.shadowRoot.querySelector('.output');
+    this.fixButton = this.shadowRoot.querySelector('.fix');
     this.update = this.update.bind(this);
+    this.fixChecksum = this.fixChecksum.bind(this);
+  }
+
+  async fixChecksum() {
+    const values = [...this.input.words];
+    const checksum = await computeChecksum(values);
+    const sumlen = checksum.length;
+    const last = values[values.length - 1];
+    const mask = (1 << sumlen) - 1;
+    const word =
+        words[(index.get(last) & ~mask) | Number.parseInt(checksum, 2)];
+    const split = [...this.input.words];
+    while (!split[split.length - 1]) split.pop();
+    split[split.length - 1] = word;
+    this.input.words = split;
+    this.update();
   }
 
   update() {
@@ -46,11 +65,13 @@ class BipSplit extends HTMLElement {
   connectedCallback() {
     this.input.addEventListener('change', this.update);
     this.count.addEventListener('change', this.update);
+    this.fixButton.addEventListener('click', this.fixChecksum);
   }
 
   disconnectedCallback() {
     this.input.removeEventListener('change', this.update);
     this.count.removeEventListener('change', this.update);
+    this.fixButton.removeEventListener('click', this.fixChecksum);
   }
 }
 

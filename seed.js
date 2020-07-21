@@ -24,7 +24,7 @@ export function xorWords(...lists) {
   return result;
 }
 
-export async function verifyChecksum(list) {
+export function bitString(list) {
   const len = list.length;
   if (len % 3) throw new Error(`Bad mnemonic length: ${len}`);
   const indices = list.map(word => {
@@ -32,12 +32,15 @@ export async function verifyChecksum(list) {
     if (!Number.isInteger(ind)) throw new Error(`Bad mnemonic: ${word}`);
     return ind;
   });
-  const bits = indices.map(i => i.toString(2).padStart(11, '0')).join('');
+  return indices.map(i => i.toString(2).padStart(11, '0')).join('');  
+}
+
+export async function computeChecksum(list) {
+  const bits = bitString(list);
   // Last 4-8 bits form the checksum.
   const sumlen = Math.floor(bits.length / 32);
   const datalen = bits.length - sumlen;
-  if (datalen % 8) throw new Error(`Bad mnemonic length: ${len}`);
-  const suffix = bits.substring(datalen);
+  if (datalen % 8) throw new Error(`Bad mnemonic length: ${list.length}`);
   const data = new Uint8Array(datalen >>> 3);
   for (let i = 0; i < data.length; i++) {
     data[i] = Number.parseInt(bits.substring(i << 3, (i + 1) << 3), 2);
@@ -45,7 +48,13 @@ export async function verifyChecksum(list) {
   // Compute and verify the checksum.
   const sum = new Uint8Array(await crypto.subtle.digest('SHA-256', data));
   const sumbits = Array.from(sum, x => x.toString(2).padStart(8, '0')).join('');
-  return sumbits.startsWith(suffix);
+  return sumbits.substring(0, sumlen);
+}
+
+export async function verifyChecksum(list) {
+  const bits = bitString(list);
+  const sum = await computeChecksum(list);
+  return bits.endsWith(sum);
 }
 
 // Returns the generated 512-bit seed as a length-64 Uint8Array.

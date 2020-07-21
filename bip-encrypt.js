@@ -5,7 +5,7 @@ const template = document.createElement('template');
 template.innerHTML = `
 <style>
 textarea {
-  white-space: pre;
+  white-space: pre-wrap;
   font-family: monospace;
   padding: .6em;
   font-size: 120%;
