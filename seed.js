@@ -3,6 +3,35 @@
 import {words, index} from './words.js';
 import {b64, utf8} from './codex.js';
 
+export const randomWords = (() => {
+  let buffer = [];
+  function nextInt() {
+    if (!buffer.length) {
+      buffer = [...crypto.getRandomValues(new Uint16Array(100))];
+    }
+    return buffer.pop();
+  }
+
+  return (count) => {
+    return new Array(count).fill(0).map(() => words[nextInt() & 0x7ff]);
+  };
+})();
+
+// mnemonic: string[]
+export async function fixChecksum(mnemonic) {
+  const values = [...mnemonic];
+  const checksum = await computeChecksum(values);
+  const sumlen = checksum.length;
+  const last = values[values.length - 1];
+  const mask = (1 << sumlen) - 1;
+  const word =
+      words[(index.get(last) & ~mask) | Number.parseInt(checksum, 2)];
+  const split = [...mnemonic];
+  while (!split[split.length - 1]) split.pop();
+  split[split.length - 1] = word;
+  return split;
+}
+
 export function xorWords(...lists) {
   // First make sure all the lists are the same length.
   const len = lists[0].length;
@@ -14,14 +43,35 @@ export function xorWords(...lists) {
   for (let i = 0; i < len; i++) {
     let ind = 0;
     for (const list of lists) {
-      const word = list[i];
+      let word = list[i];
+      if (typeof word === 'string') word = index.get(word);
       //const cur = index.get(word);
-      if (!Number.isInteger(word)) throw new Error(`Bad mnemonic: ${word}`);
+      if (!Number.isInteger(word)) throw new Error(`Bad mnemonic: '${word}'`);
       ind ^= word;
     }
     result.push(words[ind]);
   }
   return result;
+}
+
+// list: string[]
+// count: number
+// return: string[][]
+export function splitMnemonic(list, count) {
+  const need = list.length * (count - 1);
+  const rand = [...crypto.getRandomValues(new Uint16Array(need))];
+  const shares = new Array(count).fill(0).map(() => []);
+  for (let value of list) {
+    if (typeof value === 'string') value = index.get(value);
+    if (!Number.isInteger(value)) throw new Error(`Bad mnemonic: ${value}`);
+    for (let i = 1; i < count; i++) {
+      const term = rand.pop() & 0x7ff;
+      value ^= term;
+      shares[i].push(words[term]);
+    }
+    shares[0].push(words[value]);
+  }
+  return shares;
 }
 
 export function bitString(list) {

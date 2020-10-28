@@ -1,8 +1,12 @@
 {
-  "name": "bip39",
-  "version": "1.0.0",
-  "description": "Utilities for dealing with BIP-39 mnemonics",
-  "main": "bip-encrypt.js",
+  "name": "bip39-share",
+  "version": "0.1.0",
+  "description": "Utilities for dealing with split BIP-39 mnemonics",
+  "main": "index.js",
+  "type": "module",
+  "bin": {
+    "bip39-share": "cli.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,5 +23,10 @@
   "devDependencies": {
     "google-closure-compiler": "^20200628.0.0",
     "gulp": "^4.0.2"
+  },
+  "dependencies": {
+    "atob": "^2.1.2",
+    "btoa": "^1.2.1",
+    "getopts": "^2.2.5"
   }
 }

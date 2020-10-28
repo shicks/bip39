@@ -1,20 +1,21 @@
-const gulp = require('gulp');
-const closure = require('google-closure-compiler').gulp();
+import gulp from 'gulp';
+import closureImport from 'google-closure-compiler';
 
-const SRCS = [
+const closure = closureImport.gulp();
+
+const WEB_SRCS = [
   'bip-encrypt.js',
   'bip-input.js',
   'bip-shares.js',
   'bip-split.js',
   'bip-xor-table.js',
   'codex.js',
-  'index.js',
   'seed.js',
   'words.js',
 ];
 
 gulp.task('default', function() {
-  return gulp.src(SRCS, {base: './'})
+  return gulp.src(WEB_SRCS, {base: './'})
       .pipe(closure({
         compilation_level: 'SIMPLE',
         warning_level: 'VERBOSE',

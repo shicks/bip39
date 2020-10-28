@@ -1,6 +1,6 @@
 # BIP39 XOR
 
-This is a [simple tool](./xor) to do bitwise binary operations on
+The [xor tool](./xor) helps in performing bitwise binary operations on
 BIP39 words without ever typing both inputs (or the output) into a
 network-connected computer. The basic approach is to type one of the
 input words into the text input box, which updates the table mapping
@@ -28,10 +28,15 @@ For additional security, consider
 
 # BIP39 Encrypt
 
-The [encryption tool](./encrypt) allows entering a BIP39 mnemonic to
+The [encryption tool](./enc) allows entering a BIP39 mnemonic to
 use as a symmetric encryption/decryption key.  Multiple shares may be
 entered instead of a single primary mnemonic (in which case the shares
 will be XORed together, see above).
+
+# BIP39 Key Splitting
+
+The [key splitting tool](./split) can generate valid mnemonics and/or
+split them into "N of N" shares.
 
 # Disclaimer
 

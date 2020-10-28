@@ -1,11 +1,15 @@
 import {index, words} from './words.js';
-import {computeChecksum} from './seed.js';
+import {fixChecksum, splitMnemonic} from './seed.js';
 import './bip-input.js';
 
 const template = document.createElement('template');
 template.innerHTML = `
 <bip-input class="input" multi cols="80" rows="2"
            placeholder="Enter mnemonic to split"></bip-input>
+<br/>
+Words: <input class="words" type="text" value="24" size="2">
+<input class="generate" type="submit" value="Generate">
+<br/>
 Shares: <input class="count" type="text" value="3" size="2">
 <input class="fix" type="submit" value="Fix">
 <div class="output"></div>
@@ -19,41 +23,35 @@ class BipSplit extends HTMLElement {
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.input = this.shadowRoot.querySelector('.input');
     this.count = this.shadowRoot.querySelector('.count');
-    this.output = this.shadowRoot.querySelector('.output');
     this.fixButton = this.shadowRoot.querySelector('.fix');
+    this.words = this.shadowRoot.querySelector('.words');
+    this.genButton = this.shadowRoot.querySelector('.generate');
+    this.output = this.shadowRoot.querySelector('.output');
     this.update = this.update.bind(this);
     this.fixChecksum = this.fixChecksum.bind(this);
+    this.generate = this.generate.bind(this);
   }
 
   async fixChecksum() {
-    const values = [...this.input.words];
-    const checksum = await computeChecksum(values);
-    const sumlen = checksum.length;
-    const last = values[values.length - 1];
-    const mask = (1 << sumlen) - 1;
-    const word =
-        words[(index.get(last) & ~mask) | Number.parseInt(checksum, 2)];
-    const split = [...this.input.words];
-    while (!split[split.length - 1]) split.pop();
-    split[split.length - 1] = word;
-    this.input.words = split;
+    this.input.words = await fixChecksum(this.input.words)
     this.update();
+  }
+
+  async generate() {
+    const wordCount = Number(this.words.value);
+    if (isNaN(wordCount)) return;
+    const value = [];
+    for (let i = 0; i < wordCount; i++) {
+      value.push(words[Math.floor(Math.random() * 0x800)]);
+    }
+    this.input.words = value.join(' ');
+    await this.fixChecksum();
   }
 
   update() {
     const num = Number(this.count.value);
     if (isNaN(num)) return;
-    const need = this.input.values.length * (num - 1);
-    const rand = [...crypto.getRandomValues(new Uint16Array(need))];
-    const shares = new Array(num).fill(0).map(() => []);
-    for (let value of this.input.values) {
-      for (let i = 1; i < num; i++) {
-        const term = rand.pop() & 0x7ff;
-        value ^= term;
-        shares[i].push(words[term]);
-      }
-      shares[0].push(words[value]);
-    }
+    const shares = splitMnemonic(this.input.values, num);
     while (this.output.firstChild) this.output.firstChild.remove();
     for (let i = 0; i < num; i++) {
       const share = document.createElement('div');
