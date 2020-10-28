@@ -1,6 +1,6 @@
 {
   "name": "bip39-share",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Utilities for dealing with split BIP-39 mnemonics",
   "main": "index.js",
   "type": "module",

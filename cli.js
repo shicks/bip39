@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import atob from 'atob';
@@ -32,7 +34,7 @@ async function main(directive, ...args) {
     return await crypt(args, seed.decrypt);
   } else {
     usage();
-    return 1;
+    return directive === '--help' ? 0 : 1;
   }
 }
 
