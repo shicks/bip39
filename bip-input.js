@@ -70,17 +70,19 @@ class BipInput extends HTMLElement {
       // generate N random words.
       this.front.value = randomWords(Number.parseInt(e.key)).join(' ');
     }
-    if (this.front.selectionStart !== this.front.value.length) {
+    const sel = this.front.selectionStart;
+    if (sel !== this.front.value.length) {
+      const end = this.front.selectionEnd;
       this.compute();
+      this.front.selectionStart = sel;
+      this.front.selectionEnd = end;
       return;
     }
     if (e.key === 'Shift') return;
-    if (this.hasAttribute('multi') && e.key === ' ') {
-      this.front.value = this.back.value;
-      if (!this.front.value.endsWith(' ')) this.front.value += ' ';
-    }
     if (e.key === 'Tab') {
       if (this.tabLen) {
+        // Repeat hits of <tab> cycle, tabLen keeps track of how many
+        // chars were typed *before* hitting tab.
         const split = this.back.value.split(' ');
         while (split.length && !split[split.length - 1]) split.pop();
         const last = split.pop();
@@ -116,7 +118,6 @@ class BipInput extends HTMLElement {
 
   blur() {
     this.compute();
-    this.front.value = this.back.value;
   }
 
   focus() {
@@ -143,6 +144,7 @@ class BipInput extends HTMLElement {
         this.hasAttribute('multi') ?
             this.front.value.split(/\s+/g) : [this.front.value];
     let newTexts = [...texts];
+    let newTextsBack = [...texts];
     let remainder = '';
     let changed = false;
     this.wrapper.classList.remove('invalid');
@@ -154,7 +156,8 @@ class BipInput extends HTMLElement {
         this.wrapper.classList.add('invalid');
         val = -1;
       } else if (words[val] !== texts[i] && i < texts.length - 1) {
-        newTexts[i] = words[val];
+        newTextsBack[i] = words[val];
+        newTexts[i] = texts[i] + ' '.repeat(words[val].length - texts[i].length);
       } else if (i === texts.length - 1) {
         remainder = words[val].substring(texts[i].length);
       }
@@ -162,7 +165,8 @@ class BipInput extends HTMLElement {
       if (this._values[i] !== val) changed = true;
     }
     const newText = newTexts.join(' ');
-    this.back.value = newText + remainder;
+    const newTextBack = newTextsBack.join(' ');
+    this.back.value = newTextBack + remainder;
     if (newText !== this.front.value) this.front.value = newText;
     if (this._values.length !== values.length) changed = true;
 

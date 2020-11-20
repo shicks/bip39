@@ -47,6 +47,7 @@ class BipEncrypt extends HTMLElement {
       this.text.value =
           await f(await this.mnemonic.mnemonic(), this.text.value);
       this.changeText();
+      this.text.scrollTop = 0;
     } catch (err) {
       this.error.textContent = err.message || this.action.value + 'ion failed.';
     }
